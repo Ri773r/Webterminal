@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="http://localhost:8999/static/xterm/xterm.js"></script>
+    <script src="http://localhost:8999/static/zmodem/zmodem.js"></script>
+    <link href="http://localhost:8999/static/xterm/xterm.css" rel="stylesheet">
+</head>
+<body>
+    <button onclick="init()">start websocket</button>
+    <div id="terminal"></div>
+    <script>
+        var wsUrl = "ws://localhost:8999/terminal";
+        function init() {
+            shellWebSocket();
+        }
+
+        function shellWebSocket() {
+            var ws = new WebSocket(wsUrl);
+            ws.binaryType = "arraybuffer"
+            var term = new Terminal({
+                cursorBlink: true,
+                cursorStyle: "bar",
+                bellStyle: "sound"
+            })
+            term.onData(function (data) {
+                ws.send(JSON.stringify({
+                    type: "cmd",
+                    cmd: data
+                }));
+            });
+            createZsentry()
+
+            var intervalId
+            ws.onopen = function (evt) {
+                console.log("websocket open ...");
+                term.open(document.getElementById('terminal'))
+                term.focus()
+                console.log(this)
+                intervalId = login(ws)
+            };
+            ws.onclose = function (evt) {
+                console.log("websocket close ...");
+                term.dispose();
+                clearInterval(intervalId)
+            };
+            ws.onmessage = function (evt) {
+                arraybuffer2Str(evt.data).then(function(m){
+                    term.write(m);
+                })
+                window.zsentry.consume(evt.data)
+            }
+        }
+        
+        function login(ws) {
+            ws.send(JSON.stringify({
+                type: "login",
+                form: {
+                    host: "",
+                    port: 22,
+                    user: "root",
+                    auth_type: "password",
+                    password: "",
+                    key: ""
+                }
+            }))
+            intervalId = setInterval(function() {
+                ws.send(JSON.stringify({
+                    type: "heartbeat"
+                }))
+            }, 10000)
+            return intervalId
+        }
+
+        function arraybuffer2Str(buf) {
+            return new Promise(function(resolve, reject) {
+                let bo = new Blob([buf])
+                let reader = new FileReader()
+                reader.readAsText(bo, "utf-8")
+                reader.onload = function(e) {
+                    resolve(reader.result)
+                }
+            })
+        }
+
+        function createZsentry() {
+            window.zsentry = new Zmodem.Sentry({
+                to_terminal: function(octets){},
+                sender: function(octets){},
+                on_detect: function(detection){
+                    console.log("on_detect", detection)
+                    session = detection.confirm()
+                    if (session.type === "send") {
+                        console.log('zsession.type === "send"')
+                    } else {
+                        console.log('zsession.type === "recive"')
+                        session.on("offer", function(xfer){
+                            xfer.accept().then(function(){
+                                Zmodem.Browser.save_to_disk(
+                                    xfer.get_payloads(),
+                                    xfer.get_details().name
+                                )
+                            })
+                        })
+                        session.start()
+                    }
+                },
+                on_retract: function(){}
+            })
+        }
+    </script>
+</body>
+</html>
