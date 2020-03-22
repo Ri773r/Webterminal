@@ -11,6 +11,7 @@
 </head>
 <body>
     <button onclick="init()">start</button>
+    <input id="upload" type="file" onchange="upload(event)" style="display: none;">
     <div id="terminal"></div>
     <script>
         var wsUrl = "ws://localhost:8999/terminal";
@@ -92,12 +93,13 @@
                 sender: function(octets){},
                 on_detect: function(detection){
                     console.log("on_detect", detection)
-                    session = detection.confirm()
-                    if (session.type === "send") {
-                        console.log('zsession.type === "send"')
+                    window.session = detection.confirm()
+                    if (window.session.type === "send") {
+                        console.log("send")
+                        document.getElementById("upload").click()
                     } else {
-                        console.log('zsession.type === "recive"')
-                        session.on("offer", function(xfer){
+                        console.log("recive")
+                        window.session.on("offer", function(xfer){
                             xfer.accept().then(function(){
                                 Zmodem.Browser.save_to_disk(
                                     xfer.get_payloads(),
@@ -105,10 +107,17 @@
                                 )
                             })
                         })
-                        session.start()
+                        window.session.start()
                     }
                 },
                 on_retract: function(){}
+            })
+        }
+
+        function upload(evt) {
+            Zmodem.Browser.send_files(window.session, evt.target.files).then(() => {
+                window.session.close()
+                window.session = null
             })
         }
     </script>
