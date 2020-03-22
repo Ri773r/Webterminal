@@ -14,12 +14,12 @@ const (
 
 // Form Login form
 type Form struct {
-	Host      string `json:"host"`
-	Port      int    `json:"port"`
-	User      string `json:"user"`
-	AuthType  string `json:"auth_type"`
-	Password  string `json:"password"`
-	SecretKey string `json:"key"`
+	Host      string `json:"host" yaml:"host"`
+	Port      int    `json:"port" yaml:"port"`
+	User      string `json:"user" yaml:"user"`
+	AuthType  string `json:"auth_type" yaml:"auth_type"`
+	Password  string `json:"password" yaml:"password"`
+	SecretKey string `json:"key" yaml:"key"`
 }
 
 // Message Data exchange form

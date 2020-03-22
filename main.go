@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	gossh "golang.org/x/crypto/ssh"
+	"gopkg.in/yaml.v2"
 
 	"Webterminal/constant"
 	"Webterminal/ssh"
@@ -33,7 +34,24 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html")
-	t.Execute(w, struct{}{})
+	var context constant.Form
+	pwd, err := os.Getwd()
+	if err != nil {
+		resp := constant.MakeResponse(500, nil, "Failed to get current folder", false)
+		json.NewEncoder(w).Encode(resp)
+		return
+	}
+	fileName := path.Join(pwd, "ssh.yml")
+	if utils.IsExist(fileName) {
+		f, err := os.Open(fileName)
+		if err != nil {
+			resp := constant.MakeResponse(500, nil, "Open file failed", false)
+			json.NewEncoder(w).Encode(resp)
+			return
+		}
+		yaml.NewDecoder(f).Decode(&context)
+	}
+	t.Execute(w, context)
 }
 
 var upgrader = websocket.Upgrader{
@@ -341,14 +359,12 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fileFolder := path.Join(pwd, "tmp")
-	if _, err := os.Stat(fileFolder); err != nil {
-		if os.IsNotExist(err) {
-			err := os.Mkdir(fileFolder, os.ModeDir)
-			if err != nil {
-				resp := constant.MakeResponse(500, nil, "Failed to create folder", false)
-				json.NewEncoder(w).Encode(resp)
-				return
-			}
+	if !utils.IsExist(fileFolder) {
+		err := os.Mkdir(fileFolder, os.ModeDir)
+		if err != nil {
+			resp := constant.MakeResponse(500, nil, "Failed to create folder", false)
+			json.NewEncoder(w).Encode(resp)
+			return
 		}
 	}
 	fileName := fmt.Sprintf("%s-%s", utils.GetRandomString(5), strconv.FormatInt(time.Now().Unix(), 10))

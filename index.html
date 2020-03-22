@@ -10,7 +10,7 @@
     <link href="http://localhost:8999/static/xterm/xterm.css" rel="stylesheet">
 </head>
 <body>
-    <button onclick="init()">start websocket</button>
+    <button onclick="init()">start</button>
     <div id="terminal"></div>
     <script>
         var wsUrl = "ws://localhost:8999/terminal";
@@ -59,12 +59,12 @@
             ws.send(JSON.stringify({
                 type: "login",
                 form: {
-                    host: "",
-                    port: 22,
-                    user: "root",
-                    auth_type: "password",
-                    password: "",
-                    key: ""
+                    host: {{ .Host }},
+                    port: {{ .Port }},
+                    user: {{ .User }},
+                    auth_type: {{ .AuthType }},
+                    password: {{ .Password }},
+                    key: {{ .SecretKey }}
                 }
             }))
             intervalId = setInterval(function() {
