@@ -115,7 +115,7 @@
         }
 
         function upload(evt) {
-            Zmodem.Browser.send_files(window.session, evt.target.files).then(() => {
+            Zmodem.Browser.send_files(window.session, evt.target.files).then(function() {
                 window.session.close()
                 window.session = null
             })
