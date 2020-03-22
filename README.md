@@ -38,5 +38,8 @@ Modify the ssh.yml file
 Then the browser visits http://localhost:8999/  
 Click on start  
 access / and click 'start' button
+# TODO
+- [ ] rzsz
+- [ ] sftp  
 # License
 ![](https://img.shields.io/badge/License-MIT-blue.svg)
