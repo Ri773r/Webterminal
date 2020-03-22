@@ -1,6 +1,6 @@
-host: 139.9.86.33
+host: 123.123.123.123
 port: 22
 user: root
 auth_type: password
-password: light666.
+password: testpassword
 key: 
