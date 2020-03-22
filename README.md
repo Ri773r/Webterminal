@@ -34,6 +34,9 @@ If you are in China, you can use a proxy download package, run `export GOPROXY=h
   }
   ```
 # Test case
+Modify the ssh.yml file  
+Then the browser visits http://localhost:8999/  
+Click on start  
 access / and click 'start' button
 # License
 ![](https://img.shields.io/badge/License-MIT-blue.svg)
