@@ -292,7 +292,7 @@ func Terminal(w http.ResponseWriter, r *http.Request) {
 // Test ssh verify test
 func Test(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		resp := constant.MakeResponse(401, nil, "Bad Request", false)
+		resp := constant.MakeResponse(400, nil, "Bad Request", false)
 		json.NewEncoder(w).Encode(resp)
 		return
 	}
@@ -323,7 +323,7 @@ func Test(w http.ResponseWriter, r *http.Request) {
 // UploadFile upload file
 func UploadFile(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		resp := constant.MakeResponse(401, nil, "Bad Request", false)
+		resp := constant.MakeResponse(400, nil, "Bad Request", false)
 		json.NewEncoder(w).Encode(resp)
 		return
 	}
